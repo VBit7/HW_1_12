@@ -1,0 +1,14 @@
+{
+   "User1": {
+      "name": "User1",
+      "phones": [],
+      "birthday": "not set"
+   },
+   "User2": {
+      "name": "User2",
+      "phones": [
+         "0987654321"
+      ],
+      "birthday": "not set"
+   }
+}
