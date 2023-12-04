@@ -202,6 +202,85 @@ class AddressBook(UserDict):
             return f"{name} has been deleted from the AddressBook"
         return f"{name} is not in the AddressBook"
 
+'''
+    def __init__(self):
+        super().__init__()
+        self.load_from_json("address_book.json")
+
+    def __iter__(self):
+        return AddressBookIterator(self)
+
+    def add_record(self, record: Record):
+        self.data[record.name.name] = record
+
+    def pp(self):
+        print(self.data)
+
+    def find(self, name):
+        if name in self.data:
+            return self.data[name]
+        return None
+    
+    def find_phone_in_book(self, phone):
+        for user, record in self.data.items():
+            for phone_record in record.phones:
+                if phone == phone_record.value:
+                    return user
+        return f"Phone {phone} is not found"
+
+    def delete(self, name):
+        if name in self.data:
+            self.data.pop(name)
+            return f"{name} has been deleted from the AddressBook"
+        return f"{name} is not in the AddressBook"
+      
+    def load_from_json(self, filename):
+        try:
+            with open(filename, "r") as file_js:
+                records_data = json.load(file_js)
+                for name, record_data in records_data.items():
+                    record = Record(record_data["name"])
+                    lenght = range(len(record_data["phones"]))
+                    for i in lenght: 
+                        record.add_phone(record_data["phones"][i])
+                    if record_data["birthday"] != "not set":
+                        record.add_birthday(record_data["birthday"])
+                    self.data[name] = record
+        except FileNotFoundError:
+            pass
+
+    def save_to_json(self, filename):
+        records_data = {name: record.to_dict() for name, record in self.data.items()}
+        with open(filename, "w") as file_js:
+            json.dump(records_data, file_js, indent=3)
+            
+    def find_data(self):
+        search_string = input("Enter a search data: ")
+
+        found_users = []
+
+        for record in self.data.values():
+            if search_string in record.name.name:
+                found_users.append(record)
+
+            for phone in record.phones:
+                if search_string in phone.value:
+                    found_users.append(record)
+
+        if found_users:
+            print("Found users:")
+            for record in found_users:
+                print(f"Name: {record.name.name}")
+                print(f"Phones: {', '.join(phone.value for phone in record.phones)}")
+                print(f"Birthday: {record.birthday}")
+        else:
+            print("This data is not found.") 
+
+'''
+
+
+
+
 
 if __name__ == "__main__":
     # Створення нової адресної книги
@@ -256,3 +335,132 @@ if __name__ == "__main__":
         print("Page:")
         for record in page:
             print(record)
+
+
+'''
+def main():
+    print("""
+    List of Commands:
+    1 - Show all records in the address book.
+    2 - Show records in parts (paginated).
+    3 - Find data in the address book by a search string.
+    4 - Edit data for a specific record.
+    5 - Add a new record to the address book.
+    6 - Delete a specific record from the address book.
+    7 - Save data in file
+    hello - Display a welcome message.
+    good bye, close, exit - Save the address book to a file and exit the program.
+    """)
+    
+    book = AddressBook()
+
+    try:
+        while True:
+            user_input = input(">>> ")
+            if user_input == "hello":
+                print(hello())
+                
+            elif user_input == "1":
+                for _, record in book.data.items():
+                    print(record)
+                    
+            elif user_input == "2":
+                number = 0
+                for page in book:
+                    number += 1
+                    print(f"Page {number}")
+                    for record in page:
+                        print(record)
+                        
+            elif user_input == "3":
+                book.find_data()
+                
+            elif user_input == "4":
+                name = input("Input name of the record to edit --> ")
+                dataname = book.find(name)
+                while dataname:
+                    print("Choice command:\nfind phone\nedit phone\nremove phone\nback")
+                    inp1 = input(">>> ")
+
+                    if inp1 == "find phone":
+                        phone_to_find = input("Enter the phone number to find:\n")
+                        found_phone = dataname.find_phone(phone_to_find)
+                        if found_phone:
+                            print(f"Phone number of {dataname.name.value}: {found_phone.value}")
+                        else:
+                            print(f"Phone number not found for {dataname.name.value}")
+
+                    elif inp1 == "edit phone":
+                        old_ph = input("Enter the phone number you want to change:\n")
+                        new_ph = input("Enter a new phone number:\n")
+                        try:
+                            dataname.edit_phone(old_ph, new_ph)
+                            print(f"Phone number updated for {dataname.name.value}")
+                        except ValueError:
+                            print("Invalid input. Phone not updated.")
+
+                    elif inp1 == "remove phone":
+                        rem = input("Enter the phone number you want to delete:\n")
+                        result = dataname.remove_phone(rem)
+                        print(result)
+
+                    elif inp1 == "back":
+                        break
+
+                    else:
+                        print("Error command!")
+
+            elif user_input == "5":
+                name = input("Input new name --> ")
+                name_record = Record(name)
+                while True:
+                    print("Choice command:\nadd phone\nadd bd\nback\nsave record")
+                    inp = input(">>> ")
+                    if inp == "add phone":
+                        phone = input("Phone --> ")
+                        try:
+                            name_record.add_phone(phone)
+                            print(f"Phone added for {name_record.name.name}\n")
+                        except ValueError:
+                            print("Invalid phone number. Phone not added.")
+
+                    elif inp == "add bd":
+                        bd = input("BD (Y-m-d) --> ")
+                        name_record.add_birthday(bd)
+                        print(f"Birthday added for {name_record.name.value}")
+
+                    elif inp == "save record":
+                        book.add_record(name_record)
+                        print(f"Record saved for {name_record.name.value}")
+
+                    elif inp == "back":
+                        zap = input("Do you want to save data? (y): ")
+                        if zap.lower() == "y":
+                            book.add_record(name_record)
+                            print(f"Record saved for {name_record.name.value}")
+                            break
+                        else:
+                            break
+                    else:
+                        print("Error command!")
+
+            elif user_input == "6":
+                delet = input("Enter the name of the record you want to delete: ")
+                result = book.delete(delet)
+                print(result)
+                
+            elif user_input == "7":
+               book.save_to_json("address_book.json") 
+                
+            elif user_input in ("good bye", "close", "exit"):
+                book.save_to_json("address_book.json")
+                print("Good bye!")
+                break
+            
+            else:
+                print("Error command!")
+                 
+    except Exception as e:
+        book.save_to_json("address_book.json")
+        return e
+'''
