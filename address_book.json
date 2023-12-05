@@ -1,14 +1,156 @@
 {
-   "User1": {
-      "name": "User1",
-      "phones": [],
-      "birthday": "not set"
-   },
-   "User2": {
-      "name": "User2",
+   "User-1": {
+      "name": "User-1",
       "phones": [
          "0987654321"
       ],
       "birthday": "not set"
+   },
+   "John": {
+      "name": "John",
+      "phones": [
+         "1234567890"
+      ],
+      "birthday": "2010-11-10"
+   },
+   "User-255": {
+      "name": "User-255",
+      "phones": [
+         "9661459072"
+      ],
+      "birthday": "2000-11-27"
+   },
+   "User-160": {
+      "name": "User-160",
+      "phones": [
+         "2884677407"
+      ],
+      "birthday": "1971-09-18"
+   },
+   "User-123": {
+      "name": "User-123",
+      "phones": [
+         "9210433841"
+      ],
+      "birthday": "1991-09-27"
+   },
+   "User-483": {
+      "name": "User-483",
+      "phones": [
+         "5699722004"
+      ],
+      "birthday": "2000-12-13"
+   },
+   "User-876": {
+      "name": "User-876",
+      "phones": [
+         "0412000448"
+      ],
+      "birthday": "1980-09-18"
+   },
+   "User-130": {
+      "name": "User-130",
+      "phones": [
+         "2767794572"
+      ],
+      "birthday": "1991-12-23"
+   },
+   "User-117": {
+      "name": "User-117",
+      "phones": [
+         "9956988954"
+      ],
+      "birthday": "1993-12-27"
+   },
+   "User-322": {
+      "name": "User-322",
+      "phones": [
+         "0638353587"
+      ],
+      "birthday": "1982-03-07"
+   },
+   "User-910": {
+      "name": "User-910",
+      "phones": [
+         "2260388340"
+      ],
+      "birthday": "1978-07-08"
+   },
+   "User-334": {
+      "name": "User-334",
+      "phones": [
+         "1877707168"
+      ],
+      "birthday": "1977-06-30"
+   },
+   "User-512": {
+      "name": "User-512",
+      "phones": [
+         "2063123943"
+      ],
+      "birthday": "1970-07-18"
+   },
+   "User-885": {
+      "name": "User-885",
+      "phones": [
+         "1478061681"
+      ],
+      "birthday": "1973-11-07"
+   },
+   "User-867": {
+      "name": "User-867",
+      "phones": [
+         "7044080722"
+      ],
+      "birthday": "1995-07-02"
+   },
+   "User-580": {
+      "name": "User-580",
+      "phones": [
+         "8514452270"
+      ],
+      "birthday": "1990-11-03"
+   },
+   "User-614": {
+      "name": "User-614",
+      "phones": [
+         "4598998899"
+      ],
+      "birthday": "1998-02-04"
+   },
+   "User-883": {
+      "name": "User-883",
+      "phones": [
+         "4513260966"
+      ],
+      "birthday": "1976-08-22"
+   },
+   "User-845": {
+      "name": "User-845",
+      "phones": [
+         "6067315265"
+      ],
+      "birthday": "1995-08-13"
+   },
+   "User-524": {
+      "name": "User-524",
+      "phones": [
+         "5827697209"
+      ],
+      "birthday": "1985-12-06"
+   },
+   "User-961": {
+      "name": "User-961",
+      "phones": [
+         "4103641928"
+      ],
+      "birthday": "1978-05-07"
+   },
+   "User-975": {
+      "name": "User-975",
+      "phones": [
+         "8198113121"
+      ],
+      "birthday": "1977-08-17"
    }
 }

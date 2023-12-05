@@ -1,15 +1,32 @@
-from datetime import datetime
+"""
+Homework Assignment. Python Core. Module 12
+For a description of the task, please refer to the README.md file
+"""
+
+from datetime import datetime, timedelta
 from collections import UserDict
+
+import random
 import json
 
+
 class Field:
+    """
+    Базовий клас для полів запису.
+    Буде батьківським для всіх полів.
+    """
     def __init__(self, value):
         self.value = value
 
     def __str__(self):
         return str(self.value)
 
+
 class Name(Field):
+    """
+    Клас для зберігання імені контакту.
+    Обов'язкове поле.
+    """
     def __init__(self, name):
         self._name = None
         self.name = name
@@ -22,7 +39,13 @@ class Name(Field):
     def name(self, new_name):
         self._name = new_name
 
+
 class Phone(Field):
+    """
+    Клас для зберігання номера телефону.
+    Має валідацію формату (10 цифр).
+    Необов'язкове поле з телефоном. Один запис Record може містити декілька.
+    """
     def __init__(self, value):
         self._value = None
         self.value = value
@@ -36,13 +59,17 @@ class Phone(Field):
         if self.check_number(new_phone):
             self._value = new_phone
         else:
-            raise ValueError("Not correct")
+            raise ValueError("Invalid phone: phone should consist of 10 digits only")
 
     @staticmethod
     def check_number(phone_number):
         return len(phone_number) == 10 and phone_number.isdigit()
 
+
 class Birthday(Field):
+    """
+    Клас "Дні народження"
+    """
     def __init__(self, birthday):
         self._birthday = None
         self.birthday = birthday
@@ -63,20 +90,28 @@ class Birthday(Field):
         else:
             return "Birthday not set!"
 
+
 class Record:
+    """
+    Клас для зберігання інформації про контакт, включаючи ім'я та список телефонів.
+    Відповідає за логіку додавання/видалення/редагування необов'язкових полів та зберігання обов'язкового поля Name
+    """
     def __init__(self, name, birthday=None):
         self.name = Name(name)
         self.phones = []
         self.birthday = Birthday(birthday) if birthday else birthday
 
+    # Додавання телефонів
     def add_phone(self, phone_number):
         phone = phone_number
         self.phones.append(Phone(phone))
 
+    # Додавання дня народження
     def add_birthday(self, bd):
         self.birthday = Birthday(bd)
         return self.birthday
 
+    # Повертає кількість днів до наступного дня народження
     def days_to_bd(self):
         if not self.birthday:
             return "Birthday not set"
@@ -91,6 +126,7 @@ class Record:
 
         return f"{days_to_bdd} days before the birthday"
 
+    # Видалення телефонів
     def remove_phone(self, phone):
         for el in self.phones:
             if el.value == phone:
@@ -98,6 +134,7 @@ class Record:
                 return f"Phone {phone} has been deleted"
         return f"Phone {phone} is not found"
 
+    # Редагування телефонів
     def edit_phone(self, old_phone, new_phone):
         for ind, phone in enumerate(self.phones):
             if phone.value == old_phone:
@@ -105,12 +142,14 @@ class Record:
                 return f"Phone number has been updated for {self.name.name}"
         raise ValueError
 
+    # Пошук телефону
     def find_phone(self, phone_to_find):
         for phone in self.phones:
             if phone.value == phone_to_find:
                 return phone
         return None
 
+    # Перетворює дані об'єкту у формат словника
     def to_dict(self):
         return {
             "name": self.name.name,
@@ -119,17 +158,24 @@ class Record:
         }
 
     def __str__(self):
-        phone_numbers = ', '.join(str(phone) for phone in self.phones) if self.phones else "not phone"
+        phone_numbers = ', '.join(str(phone) for phone in self.phones)
         birthday = self.birthday if self.birthday else "not set"
+
         return f'{self.name.name} - {phone_numbers}, birthday - {birthday}'
 
 
 class AddressBookIterator:
+    """
+    Генератор за записами AddressBook і за одну ітерацію повертає уявлення для N записів.
+    """
     def __init__(self, address_book, per_page=10):
         self.address_book = address_book
         self.keys = list(address_book.data.keys())
         self.per_page = per_page
         self.current_page = 0
+
+    def __iter__(self):
+        return self
 
     def __next__(self):
         start_idx = self.current_page * self.per_page
@@ -145,61 +191,62 @@ class AddressBookIterator:
 
         return page_records
 
+
 class AddressBook(UserDict):
+    """
+    Клас для зберігання та управління записами.
+    Успадковується від UserDict, та містить логіку пошуку за записами до цього класу
+    """
+
     def __init__(self):
         super().__init__()
         self.load_from_json("address_book.json")
 
-    def __iter__(self):
-        return AddressBookIterator(self)
-
+    # Додавання записів
     def add_record(self, record: Record):
         self.data[record.name.name] = record
 
-    def pp(self):
-        print(self.data)
-
+    # Пошук записів за іменем
     def find(self, name):
-        if name in self.data:
-            return self.data[name]
-        return None
-    
-    def find_phone_in_book(self, phone):
-        for user, record in self.data.items():
-            for phone_record in record.phones:
-                if phone == phone_record.value:
-                    return user
-        return f"Phone {phone} is not found"
+        return self.data.get(name, None)
 
+    # Видалення записів за іменем
     def delete(self, name):
         if name in self.data:
             self.data.pop(name)
             return f"{name} has been deleted from the AddressBook"
         return f"{name} is not in the AddressBook"
-      
+
+    # Відновлення адресної книги з диска
     def load_from_json(self, filename):
         try:
-            with open(filename, "r") as file_js:
-                records_data = json.load(file_js)
-                for name, record_data in records_data.items():
-                    record = Record(record_data["name"])
-                    lenght = range(len(record_data["phones"]))
-                    for i in lenght: 
-                        record.add_phone(record_data["phones"][i])
-                    if record_data["birthday"] != "not set":
-                        record.add_birthday(record_data["birthday"])
+            with open(filename, "r") as file:
+                records_data = json.load(file)
+
+                for name, data in records_data.items():
+                    record = Record(data["name"])
+                    lenght = range(len(data["phones"]))
+
+                    for i in lenght:
+                        record.add_phone(data["phones"][i])
+
+                    if data["birthday"] != "not set":
+                        record.add_birthday(data["birthday"])
+
                     self.data[name] = record
+
         except FileNotFoundError:
             pass
 
+    # Збереження адресної книги на диск
     def save_to_json(self, filename):
         records_data = {name: record.to_dict() for name, record in self.data.items()}
-        with open(filename, "w") as file_js:
-            json.dump(records_data, file_js, indent=3)
-            
-    def find_data(self):
-        search_string = input("Enter a search data: ")
+        with open(filename, "w") as file:
+            json.dump(records_data, file, indent=3)
 
+    # Здійснює пошук в адресній книзі за ім'ям користувача або номером телефону.
+    # Підтримує пошук за частиною імені або номеру телефону.
+    def find_data_in_book(self, search_string):
         found_users = []
 
         for record in self.data.values():
@@ -211,144 +258,54 @@ class AddressBook(UserDict):
                     found_users.append(record)
 
         if found_users:
-            print("Found users:")
+            print("Found users:\n")
             for record in found_users:
                 print(f"Name: {record.name.name}")
                 print(f"Phones: {', '.join(phone.value for phone in record.phones)}")
-                print(f"Birthday: {record.birthday}")
+                print(f"Birthday: {record.birthday}\n")
         else:
-            print("This data is not found.") 
+            print("This data is not found.")
 
-def hello():
-    return "Hello! How can I help you?" 
 
-            
-def main():
-    print("""
-    List of Commands:
-    1 - Show all records in the address book.
-    2 - Show records in parts (paginated).
-    3 - Find data in the address book by a search string.
-    4 - Edit data for a specific record.
-    5 - Add a new record to the address book.
-    6 - Delete a specific record from the address book.
-    7 - Save data in file
-    hello - Display a welcome message.
-    good bye, close, exit - Save the address book to a file and exit the program.
-    """)
-    
+# Генерація рандомної дати народження
+def generate_random_birthdate(start_date='1970-01-01', end_date='2000-12-31', date_format='%Y-%m-%d'):
+    start_date = datetime.strptime(start_date, date_format)
+    end_date = datetime.strptime(end_date, date_format)
+
+    random_days = random.randint(0, (end_date - start_date).days)
+    random_birthdate = start_date + timedelta(days=random_days)
+
+    return random_birthdate.strftime(date_format)
+
+
+if __name__ == "__main__":
+    # Створення нової адресної книги
+    # Якщо файл address_book.json існує, він автоматично буде завантажений
     book = AddressBook()
 
-    try:
-        while True:
-            user_input = input(">>> ")
-            if user_input == "hello":
-                print(hello())
-                
-            elif user_input == "1":
-                for _, record in book.data.items():
-                    print(record)
-                    
-            elif user_input == "2":
-                number = 0
-                for page in book:
-                    number += 1
-                    print(f"Page {number}")
-                    for record in page:
-                        print(record)
-                        
-            elif user_input == "3":
-                book.find_data()
-                
-            elif user_input == "4":
-                name = input("Input name of the record to edit --> ")
-                dataname = book.find(name)
-                while dataname:
-                    print("Choice command:\nfind phone\nedit phone\nremove phone\nback")
-                    inp1 = input(">>> ")
+    # Додаємо запис в адресну книгу з рандомними іменем, номером телефону та датою народження
+    user_number = random.randint(100, 999)
+    data_record = Record(f'User-{user_number}')
+    phone_number = ''.join(map(str, [random.randint(0, 9) for _ in range(10)]))
+    data_record.add_phone(phone_number)
+    data_record.add_birthday(generate_random_birthdate())
+    book.add_record(data_record)
 
-                    if inp1 == "find phone":
-                        phone_to_find = input("Enter the phone number to find:\n")
-                        found_phone = dataname.find_phone(phone_to_find)
-                        if found_phone:
-                            print(f"Phone number of {dataname.name.value}: {found_phone.value}")
-                        else:
-                            print(f"Phone number not found for {dataname.name.value}")
+    # # Пошук в адресній книзі по імені користувача
+    # print("Search by username:")
+    # book.find_data_in_book("John")
+    # # Пошук в адресній книзі по номеру телефона
+    # print("Search by phone number:")
+    # book.find_data_in_book("0987654321")
 
-                    elif inp1 == "edit phone":
-                        old_ph = input("Enter the phone number you want to change:\n")
-                        new_ph = input("Enter a new phone number:\n")
-                        try:
-                            dataname.edit_phone(old_ph, new_ph)
-                            print(f"Phone number updated for {dataname.name.value}")
-                        except ValueError:
-                            print("Invalid input. Phone not updated.")
+    # Пошук в адресній книзі по частині імені користувача
+    print("Search by partial username")
+    book.find_data_in_book("Jo")
+    # Пошук в адресній книзі по частині номеру телефона
+    print("Search by partial phone number")
+    book.find_data_in_book("098765")
 
-                    elif inp1 == "remove phone":
-                        rem = input("Enter the phone number you want to delete:\n")
-                        result = dataname.remove_phone(rem)
-                        print(result)
+    # Зберігаємо адресну книгу в файл
+    book.save_to_json("address_book.json")
 
-                    elif inp1 == "back":
-                        break
-
-                    else:
-                        print("Error command!")
-
-            elif user_input == "5":
-                name = input("Input new name --> ")
-                name_record = Record(name)
-                while True:
-                    print("Choice command:\nadd phone\nadd bd\nback\nsave record")
-                    inp = input(">>> ")
-                    if inp == "add phone":
-                        phone = input("Phone --> ")
-                        try:
-                            name_record.add_phone(phone)
-                            print(f"Phone added for {name_record.name.name}\n")
-                        except ValueError:
-                            print("Invalid phone number. Phone not added.")
-
-                    elif inp == "add bd":
-                        bd = input("BD (Y-m-d) --> ")
-                        name_record.add_birthday(bd)
-                        print(f"Birthday added for {name_record.name.value}")
-
-                    elif inp == "save record":
-                        book.add_record(name_record)
-                        print(f"Record saved for {name_record.name.value}")
-
-                    elif inp == "back":
-                        zap = input("Do you want to save data? (y): ")
-                        if zap.lower() == "y":
-                            book.add_record(name_record)
-                            print(f"Record saved for {name_record.name.value}")
-                            break
-                        else:
-                            break
-                    else:
-                        print("Error command!")
-
-            elif user_input == "6":
-                delet = input("Enter the name of the record you want to delete: ")
-                result = book.delete(delet)
-                print(result)
-                
-            elif user_input == "7":
-               book.save_to_json("address_book.json") 
-                
-            elif user_input in ("good bye", "close", "exit"):
-                book.save_to_json("address_book.json")
-                print("Good bye!")
-                break
-            
-            else:
-                print("Error command!")
-                 
-    except Exception as e:
-        book.save_to_json("address_book.json")
-        return e
-         
-if __name__ == "__main__":
-    main()
-    
+    print("Good bye!")
